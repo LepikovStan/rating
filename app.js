@@ -7,28 +7,34 @@ var express = require('express'),
     routes = require('./routes'),
     path = require('path'),
     http = require('http'),
-    app = express();
+    bodyParser  = require('body-parser'),
+    app = express(),
+    office = require('office');
 
 app.set('port', 3000);
+app.set('views', __dirname + '/tpl');
+app.set('view engine', 'ejs');
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
 });
 
-app.use(function(req, res, next) {
-  if (req.url == '/') {
-    res.end('hj')
-  } else {
-    next();
-  }
+app.use(bodyParser());
+//app.use(express.cookieParser());
+
+app.get('/', function(req, res, next) {
+
+  res.render('index');
 });
 
-app.use(function(req, res, next) {
-  if (req.url == '/gt') {
-    res.end('gtasd')
-  } else {
-    next();
-  }
+app.post('/postform', function(req, res, next) {
+  //res.render('index');
+  console.log(req.body);
+
+  office.parse('rating.ods', function(err, data) {
+    console.log(data.sheets);
+  });
+  res.end();
 });
 
 // Configuration

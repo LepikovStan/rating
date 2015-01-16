@@ -5,6 +5,8 @@
   , "dependencies": {
     "express": "*",
     "jade": "*",
-    "ejs": "*"
+    "ejs": "*",
+    "body-parser": "*",
+    "office": "*"
   }
 }
