@@ -1,59 +1,40 @@
-/*var
-	options = '',
-	W,
-	D=1,
-	T=1,
-	K=32,
-	html = '<table>';
-	
-	html += ;
-	
-	$.each(users, function(i, user) {
-		user.id = i+1;
-		usersObj[user.id] = user;
-		options += '<option value="'+user.id+'">'+user.fullname+'</option>';
-		
-		html += '<tr>'+
-				'<td>'+user.position+'</td>'+
-				'<td>'+user.fullname+'</td>'+
-				'<td>'+user.city+'</td>'+
-				'<td>'+user.tournaments+'</td>'+
-				'<td>'+user.currentSeason+'</td>'+
-				'<td>'+user.games+'</td>'+
-				'<td>'+user.wins+'</td>'+
-				'<td>'+user.loses+'</td>'+
-				'<td>'+user.winsProcent+'</td>'+
-				'<td>'+user.rating+'</td>'+
-				'<td>'+user.rang+'</td>'+
-			'</tr>';
-	});
-	
-	html += '</table>';
-	
-	$('.wrapper').html(html);
-	
-	$('form').html(
-		'<select name="player1">'+options+'</select>' + 
-		'<input type="text" value="" name="score1"> : <input type="text" value="" name="score2">' +
-		'<select name="player2">'+options+'</select>'+
-		'<div><input type="submit" value="send" /></div>'
-	);
-	*/
-var MainView = Backbone.View.extend({
+
+var select = '<select>'+
+		'<option></option>'+
+		'<option value="0">0</option>'+
+		'<option value="1">1</option>'+
+		'<option value="2">2</option>'+
+		'<option value="3">3</option>'+
+		'<option value="4">4</option>'+
+		'<option value="5">5</option>'+
+		'<option value="6">6</option>'+
+		'<option value="7">7</option>'+
+		'</select>',
+	MainView = Backbone.View.extend({
 		model: new Model(),
 		el: '#wrapper',
 		tournamentChooseTemplate: '<div class="tournamentInfo">Выберите тип турнира<br /><select name="tournamentInfo"><option></option>'+
-									'<% _.each(tournamentsInfo, function(tInfo, val) { %> <option value="<%= val %>"><%= tInfo.name %></option> <% }); %>'+
+									'<% _.each(tournamentInfo, function(tInfo, val) { %> <option value="<%= val %>"><%= tInfo.name %></option> <% }); %>'+
 								'</select></div>',
-		tournamentFormatTemplate: '<div class="tournamentFormat">Выберите фрмат соревнований<br /><select name="tournamentFormat" disabled>'+
+		tournamentFormatTemplate: '<div class="tournamentFormat">Выберите формат соревнований<br /><select name="tournamentFormat" disabled>'+
 									'<option></option>'+
 									'<option value="single">Одиночки</option>'+
 									'<option value="double">Пары</option>'+
-								'</select></div>',
-		/*selectPlayerTemplate: '<div class="playerInfo">Выберите игрока<br /><select><option></option>'+
-								'<% _.each(tournamentsInfo, function(tInfo, val) { %> <option value="<%= val %>"><%= tInfo.name %></option> <% }); %>'+
-							'</select></div>',*/
-		ratingTableTemplate: '<div class="ratingTable"><table>'+
+								'</select></div><div class="matches"></div>',
+		selectPlayerTemplate: '<div class="playerInfo">'+
+								'<table><tr><td>Выберите игроков<br/>'+
+								'<select name="player1"><option></option>'+
+									'<% _.each(el.usersList, function(user) { %> <option value="<%= user.id %>"><%= user.fullname %></option> <% }); %>'+
+								'</select><br/>'+
+								'<select name="player2"><option></option>'+
+									'<% _.each(el.usersList, function(user) { %> <option value="<%= user.id %>"><%= user.fullname %></option> <% }); %>'+
+								'</select>'+
+								'</td><td>Счёт<br/>'+
+									'<div class="pl1">'+ select + select + select + select + select +'</div>'+
+									'<div class="pl2">'+ select + select + select + select + select +'</div>'+
+								'</td></tr></table>'+
+							'</div>',
+		ratingTableTemplate: '<table>'+
 								'<tr>'+
 									'<th>№</th>'+
 									'<th>Имя</th>'+
@@ -67,8 +48,8 @@ var MainView = Backbone.View.extend({
 									'<th>Рейтинг</th>'+
 									'<th>Ранг</th>'+
 								'</tr>'+
-								'<% _.each(usersList, function(user) { %> <tr>'+
-									'<td><%= user.position %></td>'+
+								'<% _.each(usersList, function(user ,num) { %> <tr>'+
+									'<td><div><span class="diff"><%= user.oldPosition %> (<%= user.diff %>)</span></div><%= user.position %></td>'+
 									'<td><%= user.fullname %></td>'+
 									'<td><%= user.city %></td>'+
 									'<td><%= user.tournaments %></td>'+
@@ -80,7 +61,7 @@ var MainView = Backbone.View.extend({
 									'<td><%= user.rating %></td>'+
 									'<td><%= user.rang %></td>'+
 								'</tr> <% }); %>'+
-							'</table></div>',
+							'</table>',
 		initialize: function() {
 			this.template = _.template(
 				this.colTemplate([
@@ -90,19 +71,24 @@ var MainView = Backbone.View.extend({
 					},
 					{
 						col: 'r',
-						html: this.ratingTableTemplate
+						html: '<div class="ratingTable">' + this.ratingTableTemplate + '</div>'
 					}
 				])
 			);
 		
 			this.model.on('change', _.bind(function() {
-				this.render();
+				var chAttrs = this.model.changedAttributes();
+			
+				if (chAttrs.users) {
+					this.render();
+				}
 			}, this));
 			
 			this.model.fill();
+			usersList = this.model.get('usersList');
 		},
 		colTemplate: function(options) {
-			var html = '<div class="cols">';
+			var html = '<div class="matchResults"></div><div class="cols">';
 					
 				_.each(options, function(el) {
 					html += '<div class="'+el.col+'-col">'+el.html+'</div>';
@@ -113,13 +99,191 @@ var MainView = Backbone.View.extend({
 			return html;
 		},
 		events: {
-			'change select[name="tournamentInfo"]': 'chooseTournamentInfo'
+			'change select[name="tournamentInfo"]': 'chooseTournamentInfo',
+			'change select[name="tournamentFormat"]': 'chooseTournamentFormat',
+			'change select[name="player1"], select[name="player2"]': 'changePlayer',
+			'click button': 'send'
+		},
+		renderGames: function() {
+			var html = '';
+			
+			_.each(this.model.get('games'), function(game, num) {
+				var scores = '';
+			
+				_.each(game.winner.score, function(score, i) {
+					scores += '<div>' + game.winner.score[i] + ':' + game.loser.score[i] + '</div>';
+				});
+			
+				html += '<table class="match"><tr><td>'+game.winner.fullname+'</td><td>'+scores+'</td><td>'+game.loser.fullname+'</td></tr></table>';
+				
+				console.log('game', game)
+			});
+		
+			this.$('.matchResults').html(html);
+		},
+		send: function(e) {
+			var $this = $(e.target),
+				score1 = [],
+				score2 = [],
+				win1 = 0,
+				win2 = 0,
+				player1 = this.model.get('users')[$('select[name="player1"]').val()],
+				player2 = this.model.get('users')[$('select[name="player2"]').val()],
+				tournamentInfo = this.model.get('tournamentInfo'),
+				T = tournamentInfo[$('select[name="tournamentInfo"]').val()].coeff,
+				D = 1,
+				winner = player1,
+				loser = player2,
+				K;
+			
+			$('select').each(function(i, el) {
+				if ($(this).closest('.pl1').length) {
+					score1.push($(this).val());
+				}
+				if ($(this).closest('.pl2').length) {
+					score2.push($(this).val());
+				}
+			});
+			
+			console.log('player1: ' + player1.fullname + ', rating: ' + player1.rating);
+			console.log('player2: ' + player2.fullname + ', rating: ' + player2.rating);
+			
+			_.each(score1, function(el, i) {
+				if (score1[i] > score2[i]) {
+					win1 += 1;
+				}
+				
+				if (score2[i] > score1[i]) {
+					win2 += 1;
+				}
+			});
+			
+			if (win1 > win2) {
+				D = 1;
+				K = win1 - win2;
+				winner = player1;
+				loser = player2;
+				winnerscore = score1;
+				loserscore = score2;
+			} else {
+				D = 1;
+				K = win2 - win1;
+				winner = player2;
+				loser = player1;
+				winnerscore = score2;
+				loserscore = score1;
+			}
+			
+			winnerdiff = this.newRating(
+				1, 
+				1, 
+				T, 
+				this.model.get('K')[K],
+				winner,
+				loser
+			),
+			loserdiff = this.newRating(
+				-1, 
+				1, 
+				T, 
+				this.model.get('K')[K],
+				winner,
+				loser
+			);
+					
+			console.log('winner: ' + winner.fullname + ', new rating: ' + 
+				(parseInt(winner.rating) + winnerdiff) + ', diff: ' + winnerdiff
+			);
+			console.log('loser: ' + loser.fullname + ', new rating: ' + 
+				(parseInt(loser.rating) + loserdiff) + ', diff: ' + loserdiff
+			);
+			
+			winner.rating = parseInt(winner.rating) + winnerdiff;
+			loser.rating = parseInt(loser.rating) + loserdiff;
+			
+			winner.diff += winnerdiff;
+			loser.diff += loserdiff;
+			
+			this.model.setGame({
+				winner: {
+					fullname: winner.fullname,
+					score: _.compact(winnerscore)
+				},
+				loser: {
+					fullname: loser.fullname,
+					score: _.compact(loserscore)
+				}
+			});
+			
+			this.renderTable();
+			this.renderGames();
+		},
+		renderTable: function() {
+			usersList.sort(function(a, b) {
+				return b.rating - a.rating;
+			});
+			$.each(usersList, function(i, user) {
+				user.position = i+1;
+			});
+		
+			this.$('.ratingTable').html(_.template(this.ratingTableTemplate)(this.model.attributes));
+			
+			$.each(usersList, function(i, user) {
+				user.oldPosition = user.position;
+			});
+		},
+		newRating: function(W, D, T, K, winner, loser) {
+			//console.log('!!!!! newRating !!!!!!', winner.fullname, loser.fullname);
+			//console.log('WDTK', W, D, T, K, W*D*T*K);
+			//console.log('RL - RW', loser.rating - winner.rating);
+			//console.log('RL - RW/400', (loser.rating - winner.rating)/400);
+			//console.log('pow RL - RW/400', Math.pow(10, (loser.rating - winner.rating)/400));
+			//console.log('1 - 1/10 (RL - RW/400) + 1', 1 - (1/(Math.pow(10, (loser.rating - winner.rating)/400) + 1)));
+			
+			return Math.round(W*D*T*K * (1 - (1/(Math.pow(10, (loser.rating - winner.rating)/400) + 1))));
+		},
+		changePlayer: function(e) {
+			var $this = $(e.target),
+				name = $this.attr('name'),
+				val = $this.val();
+			
+			if (name === 'player1') {
+				$('select[name="player2"] option[disabled]').removeAttr('disabled');
+				$('select[name="player2"] option[value="'+val+'"]').attr('disabled', 'disabled');
+			}
+			
+			if (name === 'player2') {
+				$('select[name="player1"] option[disabled]').removeAttr('disabled');
+				$('select[name="player1"] option[value="'+val+'"]').attr('disabled', 'disabled');
+			}
 		},
 		chooseTournamentInfo: function(e) {
-			console.log('chooseTournamentInfo', e, this)
+			var $this = this.$(e.target);
+			
+			this.tournamentFormatSelect.removeAttr('disabled');
+		},
+		chooseTournamentFormat: function(e) {
+			var val = $(e.target).val();
+		
+			this.model.set('tournamentFormat', val);
+			
+			if (val === 'single') {
+				this.renderMatchesForm();
+			}
 		},
 		render: function() {
 			this.$el.html(this.template(this.model.attributes));
+			
+			this.setElements();
+		},
+		renderMatchesForm: function() {
+			var selectOptions = '';
+			
+			this.matches.html(_.template(this.selectPlayerTemplate)({ el: { player: 1, usersList: this.model.get('usersList') } }) + '<button>send</button>');
+		},
+		setElements: function() {
+			this.tournamentFormatSelect = this.$('select[name="tournamentFormat"]');
+			this.matches = this.$('.matches');
 		}
 	});
 	
