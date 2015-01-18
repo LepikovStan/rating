@@ -21,7 +21,7 @@ var select = '<select>'+
 									'<option value="single">Одиночки</option>'+
 									'<option value="double">Пары</option>'+
 								'</select></div><div class="matches"></div>',
-		selectPlayerTemplate: '<div class="playerInfo">'+
+		selectPlayerSingleTemplate: '<div class="playerInfo">'+
 								'<table><tr><td>Выберите игроков<br/>'+
 								'<select name="player1"><option></option>'+
 									'<% _.each(el.usersList, function(user) { %> <option value="<%= user.id %>"><%= user.fullname %></option> <% }); %>'+
@@ -34,6 +34,24 @@ var select = '<select>'+
 									'<div class="pl2">'+ select + select + select + select + select +'</div>'+
 								'</td></tr></table>'+
 							'</div>',
+		selectPlayerDoubleTemplate: '<div class="playerInfo">'+
+								'<table><tr><td>Выберите игроков<br/>'+
+								'<select name="player1"><option></option>'+
+									'<% _.each(el.usersList, function(user) { %> <option value="<%= user.id %>"><%= user.fullname %></option> <% }); %>'+
+								'</select>/<br/>'+
+								'<select name="player2"><option></option>'+
+									'<% _.each(el.usersList, function(user) { %> <option value="<%= user.id %>"><%= user.fullname %></option> <% }); %>'+
+								'</select><br/>'+
+								'<select name="player3"><option></option>'+
+									'<% _.each(el.usersList, function(user) { %> <option value="<%= user.id %>"><%= user.fullname %></option> <% }); %>'+
+								'</select>/<br/>'+
+								'<select name="player4"><option></option>'+
+									'<% _.each(el.usersList, function(user) { %> <option value="<%= user.id %>"><%= user.fullname %></option> <% }); %>'+
+								'</select>'+
+								'</td><td>Счёт<br/>'+
+									'<div class="pl1">'+ select + select + select + select + select +'</div>'+
+									'<div class="pl2">'+ select + select + select + select + select +'</div>'+
+								'</td></tr></table>',
 		ratingTableTemplate: '<table>'+
 								'<tr>'+
 									'<th>№</th>'+
@@ -49,7 +67,7 @@ var select = '<select>'+
 									'<th>Ранг</th>'+
 								'</tr>'+
 								'<% _.each(usersList, function(user ,num) { %> <tr>'+
-									'<td><div><span class="diff"><%= user.oldPosition %> (<%= user.diff %>)</span></div><%= user.position %></td>'+
+									'<td><div><span class="diff"><%= user.oldPosition %> <!--(<%= user.diff %>)--></span></div><%= user.newposition %></td>'+
 									'<td><%= user.fullname %></td>'+
 									'<td><%= user.city %></td>'+
 									'<td><%= user.tournaments %></td>'+
@@ -121,6 +139,13 @@ var select = '<select>'+
 		
 			this.$('.matchResults').html(html);
 		},
+		getDoubleRating: function(rating1, rating2) {
+			if (rating1 > rating2) {
+				return Math.round((2*rating1 + rating2)/3);
+			} else {
+				return Math.round((2*rating2 + rating1)/3);
+			}
+		},
 		send: function(e) {
 			var $this = $(e.target),
 				score1 = [],
@@ -129,11 +154,13 @@ var select = '<select>'+
 				win2 = 0,
 				player1 = this.model.get('users')[$('select[name="player1"]').val()],
 				player2 = this.model.get('users')[$('select[name="player2"]').val()],
+				player3 = this.model.get('users')[$('select[name="player3"]').val()],
+				player4 = this.model.get('users')[$('select[name="player4"]').val()],
 				tournamentInfo = this.model.get('tournamentInfo'),
 				T = tournamentInfo[$('select[name="tournamentInfo"]').val()].coeff,
 				D = 1,
-				winner = player1,
-				loser = player2,
+				winner,
+				loser,
 				K;
 			
 			$('select').each(function(i, el) {
@@ -145,8 +172,13 @@ var select = '<select>'+
 				}
 			});
 			
-			console.log('player1: ' + player1.fullname + ', rating: ' + player1.rating);
-			console.log('player2: ' + player2.fullname + ', rating: ' + player2.rating);
+			if (player3 && player4) {
+				console.log('double1: ' + player1.fullname + '/' + player2.fullname + ', rating: ' + this.getDoubleRating(parseInt(player1.rating), parseInt(player2.rating)));
+				console.log('double2: ' + player3.fullname + '/' + player4.fullname + ', rating: ' + this.getDoubleRating(parseInt(player3.rating), parseInt(player4.rating)));
+			} else {
+				console.log('player1: ' + player1.fullname + ', rating: ' + player1.rating);
+				console.log('player2: ' + player2.fullname + ', rating: ' + player2.rating);
+			}
 			
 			_.each(score1, function(el, i) {
 				if (score1[i] > score2[i]) {
@@ -191,12 +223,22 @@ var select = '<select>'+
 				loser
 			);
 					
-			console.log('winner: ' + winner.fullname + ', new rating: ' + 
-				(parseInt(winner.rating) + winnerdiff) + ', diff: ' + winnerdiff
-			);
-			console.log('loser: ' + loser.fullname + ', new rating: ' + 
-				(parseInt(loser.rating) + loserdiff) + ', diff: ' + loserdiff
-			);
+			
+			if (player3 && player4) {
+				console.log('winner: ' + winner.fullname + ', new rating: ' + 
+					(parseInt(winner.rating) + winnerdiff) + ', diff: ' + winnerdiff
+				);
+				console.log('loser: ' + loser.fullname + ', new rating: ' + 
+					(parseInt(loser.rating) + loserdiff) + ', diff: ' + loserdiff
+				);
+			} else {
+				console.log('winner: ' + winner.fullname + ', new rating: ' + 
+					(parseInt(winner.rating) + winnerdiff) + ', diff: ' + winnerdiff
+				);
+				console.log('loser: ' + loser.fullname + ', new rating: ' + 
+					(parseInt(loser.rating) + loserdiff) + ', diff: ' + loserdiff
+				);
+			}
 			
 			winner.rating = parseInt(winner.rating) + winnerdiff;
 			loser.rating = parseInt(loser.rating) + loserdiff;
@@ -222,15 +264,20 @@ var select = '<select>'+
 			usersList.sort(function(a, b) {
 				return b.rating - a.rating;
 			});
+			
 			$.each(usersList, function(i, user) {
-				user.position = i+1;
+				var diff = user.position - (i+1);
+			
+				if (diff !== 0) {
+					user.oldPosition = diff;
+				} else {
+					diff = '';
+				}
+				
+				user.newposition = i+1;
 			});
 		
 			this.$('.ratingTable').html(_.template(this.ratingTableTemplate)(this.model.attributes));
-			
-			$.each(usersList, function(i, user) {
-				user.oldPosition = user.position;
-			});
 		},
 		newRating: function(W, D, T, K, winner, loser) {
 			//console.log('!!!!! newRating !!!!!!', winner.fullname, loser.fullname);
@@ -249,12 +296,42 @@ var select = '<select>'+
 			
 			if (name === 'player1') {
 				$('select[name="player2"] option[disabled]').removeAttr('disabled');
+				$('select[name="player3"] option[disabled]').removeAttr('disabled');
+				$('select[name="player4"] option[disabled]').removeAttr('disabled');
+				
 				$('select[name="player2"] option[value="'+val+'"]').attr('disabled', 'disabled');
+				$('select[name="player3"] option[value="'+val+'"]').attr('disabled', 'disabled');
+				$('select[name="player4"] option[value="'+val+'"]').attr('disabled', 'disabled');
 			}
 			
 			if (name === 'player2') {
 				$('select[name="player1"] option[disabled]').removeAttr('disabled');
+				$('select[name="player3"] option[disabled]').removeAttr('disabled');
+				$('select[name="player4"] option[disabled]').removeAttr('disabled');
+				
 				$('select[name="player1"] option[value="'+val+'"]').attr('disabled', 'disabled');
+				$('select[name="player3"] option[value="'+val+'"]').attr('disabled', 'disabled');
+				$('select[name="player4"] option[value="'+val+'"]').attr('disabled', 'disabled');
+			}
+			
+			if (name === 'player3') {
+				$('select[name="player1"] option[disabled]').removeAttr('disabled');
+				$('select[name="player2"] option[disabled]').removeAttr('disabled');
+				$('select[name="player4"] option[disabled]').removeAttr('disabled');
+				
+				$('select[name="player1"] option[value="'+val+'"]').attr('disabled', 'disabled');
+				$('select[name="player2"] option[value="'+val+'"]').attr('disabled', 'disabled');
+				$('select[name="player4"] option[value="'+val+'"]').attr('disabled', 'disabled');
+			}
+			
+			if (name === 'player4') {
+				$('select[name="player1"] option[disabled]').removeAttr('disabled');
+				$('select[name="player2"] option[disabled]').removeAttr('disabled');
+				$('select[name="player3"] option[disabled]').removeAttr('disabled');
+				
+				$('select[name="player1"] option[value="'+val+'"]').attr('disabled', 'disabled');
+				$('select[name="player2"] option[value="'+val+'"]').attr('disabled', 'disabled');
+				$('select[name="player3"] option[value="'+val+'"]').attr('disabled', 'disabled');
 			}
 		},
 		chooseTournamentInfo: function(e) {
@@ -270,16 +347,24 @@ var select = '<select>'+
 			if (val === 'single') {
 				this.renderMatchesForm();
 			}
+			
+			if (val === 'double') {
+				this.renderMatchesForm(true);
+			}
 		},
 		render: function() {
 			this.$el.html(this.template(this.model.attributes));
 			
 			this.setElements();
 		},
-		renderMatchesForm: function() {
+		renderMatchesForm: function(doubles) {
 			var selectOptions = '';
 			
-			this.matches.html(_.template(this.selectPlayerTemplate)({ el: { player: 1, usersList: this.model.get('usersList') } }) + '<button>send</button>');
+			if (doubles) {
+				this.matches.html(_.template(this.selectPlayerDoubleTemplate)({ el: { usersList: this.model.get('usersList') } }) + '<button>send</button>');
+			} else {
+				this.matches.html(_.template(this.selectPlayerSingleTemplate)({ el: { usersList: this.model.get('usersList') } }) + '<button>send</button>');
+			}
 		},
 		setElements: function() {
 			this.tournamentFormatSelect = this.$('select[name="tournamentFormat"]');

@@ -33,7 +33,8 @@ var data = '[{"fullname":"Панфилов Фёдор","surname":"Панфило
 			$.each(usersList, function(i, user) {
 				user.id = i + 1;
 				user.position = i + 1;
-				user.oldPosition = i + 1;
+				user.newposition = i + 1;
+				user.oldPosition = '';
 				user.diff = 0;
 				users[user.id] = user;
 			});

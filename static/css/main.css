@@ -65,6 +65,11 @@ command,datalist,keygen,mark,meter,progress,rp,rt,ruby,time,wbr {display: inline
 	left: 20px;
 	top: 20px;
 }
+.matchResults table {}
+.matchResults table td {
+	vertical-align: top;
+	padding: 5px;
+}
 /* wrapper (end) */
 
 /* cols (begin) */
