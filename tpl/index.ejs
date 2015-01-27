@@ -20,14 +20,21 @@
 	<![endif]-->
 
 
-    <!--script type="text/javascript" src="js/jquery.js"></script>
-    <script type="text/javascript" src="js/main.js"></script-->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+    <script type="text/javascript">
+		$(function() {
+			$('button').on('click', function() {
+				$.post('/player/new', { name: 'Panfilov' }, function(data) {
+					console.log(data)
+				});
+				
+				return false;
+			});
+		});
+	</script>
 </head>
 
 <body>
-	<form action="/postform" method="post">
-		<input type="file" value="" name="file" />
-		<input type="submit" value="submit" />
-	</form>
+	<div class="newplayer"><input type="text" name="name" value="" /><button>send</button></div>
 </body>
 </html>

@@ -7,6 +7,6 @@
     "jade": "*",
     "ejs": "*",
     "body-parser": "*",
-    "office": "*"
+    "mysql": "*"
   }
 }

@@ -9,8 +9,24 @@ var express = require('express'),
     http = require('http'),
     bodyParser  = require('body-parser'),
     app = express(),
-    office = require('office');
+    mysql = require('mysql'),
+	connection =  mysql.createConnection({
+		host: 'localhost',
+		user: 'root',
+		password: '123'
+	});
 
+connection.query('use rating');
+	var strQuery = 'select * from players';	
+	//connection.query("SET NAMES 'UTF-8'");
+	connection.query( strQuery, function(err, rows){
+  	if (err) {
+  		throw err;
+  	} else{
+  		console.log( rows );
+  	}
+});
+	
 app.set('port', 3000);
 app.set('views', __dirname + '/tpl');
 app.set('view engine', 'ejs');
@@ -27,14 +43,9 @@ app.get('/', function(req, res, next) {
   res.render('index');
 });
 
-app.post('/postform', function(req, res, next) {
-  //res.render('index');
-  console.log(req.body);
-
-  office.parse('rating.ods', function(err, data) {
-    console.log(data.sheets);
-  });
-  res.end();
+app.post('/player/new', function(req, res, next) {
+	console.log(req.body);
+	res.end();
 });
 
 // Configuration
