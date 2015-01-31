@@ -1,52 +1,23 @@
-
-/**
- * Module dependencies.
- */
-
 var express = require('express'),
     routes = require('./routes'),
     path = require('path'),
     http = require('http'),
     bodyParser  = require('body-parser'),
     app = express(),
-    mysql = require('mysql'),
-	connection =  mysql.createConnection({
-		host: 'localhost',
-		user: 'root',
-		password: '123'
-	});
-
-connection.query('use rating');
-	var strQuery = 'select * from players';	
-	//connection.query("SET NAMES 'UTF-8'");
-	connection.query( strQuery, function(err, rows){
-  	if (err) {
-  		throw err;
-  	} else{
-  		console.log( rows );
-  	}
-});
+    db = require('./db');
 	
 app.set('port', 3000);
 app.set('views', __dirname + '/tpl');
-app.set('view engine', 'ejs');
+app.set('view engine', 'jade');
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
 });
 
 app.use(bodyParser());
-//app.use(express.cookieParser());
 
-app.get('/', function(req, res, next) {
-
-  res.render('index');
-});
-
-app.post('/player/new', function(req, res, next) {
-	console.log(req.body);
-	res.end();
-});
+app.get('/', routes.index);
+app.post('/player/new', routes.newPlayer);
 
 // Configuration
 

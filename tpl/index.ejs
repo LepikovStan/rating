@@ -23,8 +23,14 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
     <script type="text/javascript">
 		$(function() {
-			$('button').on('click', function() {
-				$.post('/player/new', { name: 'Panfilov' }, function(data) {
+			$('.newplayer button').on('click', function() {
+				data = {};
+			
+				$('input').each(function(i, el) {
+					data[$(el).attr('name')] = $(el).val();
+				});
+			
+				$.post('/player/new', data, function(data) {
 					console.log(data)
 				});
 				
@@ -35,6 +41,56 @@
 </head>
 
 <body>
-	<div class="newplayer"><input type="text" name="name" value="" /><button>send</button></div>
+	<div class="newplayer">
+		Добавить игрока
+		<div class="field">
+			Имя<br/>
+			<input type="text" name="firstname" value="" />
+		</div>
+		<div class="field">
+			Фамилия<br/>
+			<input type="text" name="lastname" value="" />
+		</div>
+		<div class="field">
+			Город<br/>
+			<input type="text" name="city" value="" />
+		</div>
+		<div class="field">
+			Турниров<br/>
+			<input type="text" name="tournaments" value="" />
+		</div>
+		<div class="field">
+			Турниров сезона<br/>
+			<input type="text" name="seasonTournaments" value="" />
+		</div>
+		<div class="field">
+			Матчей<br/>
+			<input type="text" name="games" value="" />
+		</div>
+		<div class="field">
+			Побед<br/>
+			<input type="text" name="wins" value="" />
+		</div>
+		<div class="field">
+			Поражений<br/>
+			<input type="text" name="loses" value="" />
+		</div>
+		<div class="field">
+			Рейтинг<br/>
+			<input type="text" name="rating" value="" />
+		</div>
+		<div class="field">
+			Ранг<br/>
+			<input type="text" name="rang" value="" />
+		</div>
+		<div class="field">
+			Активность<br/>
+			<input type="text" name="activity" value="" />
+		</div>
+		
+		<div class="buttons">
+			<button>send</button>
+		</div>
+	</div>
 </body>
 </html>
