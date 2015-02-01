@@ -22,7 +22,8 @@ module.exports = {
 					]
 				},
 				{ name: 'activity', label: 'Последний турнир', type: 'text' },
-				{ name: 'active', label: 'Активность', type: 'checkbox' }
+				{ name: 'active', label: 'Активность', type: 'checkbox' },
+				{ name: 'placeDiff', label: 'Разница с прошлого пересчёта рейтинга', type: 'text' }
 			],
 			rangs = ['Новичок', 'Любитель', 'Эксперт', 'Мастер', 'Грандмастер'];
 			
@@ -30,7 +31,6 @@ module.exports = {
 			var place = 0;
 		
 			for (var i = 0; i < rows.length; i++) {
-				
 				if (rows[i].active) {
 					place = place + 1;
 					rows[i].place = place;
@@ -51,7 +51,7 @@ module.exports = {
 	},
 	newPlayer: function(req, res, next) {
 		var winsPercent = Math.round((parseInt(req.body.wins.trim()) / parseInt(req.body.games.trim())) * 100),
-			query = 'insert into players (firstname, lastname, city, tournaments, seasonTournaments, games, wins, loses, wins_percent, rating, rang) values (' + 
+			query = 'insert into players (firstname, lastname, city, tournaments, seasonTournaments, games, wins, loses, wins_percent, rating, rang, active, placeDiff, activity) values (' + 
 				'"' + escape(req.body.firstname.trim()) + '", ' +
 				'"' + escape(req.body.lastname.trim()) + '", ' +
 				'"' + escape(req.body.city.trim()) + '", ' +
@@ -62,7 +62,11 @@ module.exports = {
 				parseInt(req.body.loses.trim()) + ', ' +
 				winsPercent + ', ' +
 				parseInt(req.body.rating.trim()) + ', ' +
-				'"' + parseInt(req.body.rang.trim()) + '");',
+				parseInt(req.body.rang.trim()) + ', ' +
+				req.body.active + ', ' +
+				parseInt(req.body.placeDiff) + ', ' +
+				req.body.activity.trim() + ');',
+				
 				rangs = ['Новичок', 'Любитель', 'Эксперт', 'Мастер', 'Грандмастер'];
 		
 		db.query(query, function(err, rows){
@@ -72,20 +76,7 @@ module.exports = {
 				db.query('select * from players order by rating desc', function(err, rows){
 					res.send({
 						status: 'ok',
-						player: {
-							firstname: unescape(req.body.firstname),
-							lastname: unescape(req.body.lastname),
-							city: req.body.city,
-							tournaments: req.body.tournaments,
-							seasonTournaments: req.body.seasonTournaments,
-							games: req.body.games,
-							wins: req.body.wins,
-							loses: req.body.loses,
-							winsPercent: winsPercent,
-							rating: req.body.rating,
-							rang: rangs[req.body.rang]
-						},
-						rows: rows,
+						rows: rows
 					});
 				});
 			}

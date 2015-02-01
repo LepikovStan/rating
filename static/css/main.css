@@ -58,3 +58,13 @@ command,datalist,keygen,mark,meter,progress,rp,rt,ruby,time,wbr {display: inline
 .ratingTable tr.nonactive td {
 	color: #aaa;
 }
+.ratingTable .placeDiff {
+	position: relative;
+	padding: 10px;
+	margin: -10px;
+}
+.ratingTable .placeDiff span {
+	position: absolute;
+	right: 100%;
+	margin-right: 10px;
+}

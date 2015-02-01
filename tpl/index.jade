@@ -9,7 +9,7 @@ mixin field(field)
 					each opt in field.options
 						option(value=opt.val)=opt.name
 			else if field.type == 'checkbox'
-				input(type="checkbox", name=field.name)
+				input(type="checkbox", name=field.name, checked="checked")
 
 doctype html
 html(lang="en")
@@ -48,7 +48,15 @@ html(lang="en")
 				each row, index in rows
 					if row.active
 						tr
-							td=row.place
+							td
+								if row.place > 0
+									div.placeDiff.positive
+										=row.place
+										span='+' + row.placeDiff
+								else
+									div.placeDiff.negative
+										=row.place
+										span=row.placeDiff
 							td=row.firstname + ' ' + row.lastname
 							td=row.city
 							td=row.tournaments
