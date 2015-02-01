@@ -3,61 +3,78 @@ var db = require('../db');
 module.exports = {
 	index: function(req, res){
 		var fields = [
-				{ name: 'firstname', label: 'Имя' },
-				{ name: 'lastname', label: 'Фамилия' },
-				{ name: 'city', label: 'Город' },
-				{ name: 'tournaments', label: 'Турниров' },
-				{ name: 'seasonTournaments', label: 'Турниров сезона' },
-				{ name: 'games', label: 'Матчей' },
-				{ name: 'wins', label: 'Побед' },
-				{ name: 'loses', label: 'Поражений' },
-				{ name: 'rating', label: 'Рейтинг' },
-				{ name: 'rang', label: 'Ранг' },
-				{ name: 'activity', label: 'Активность' }
-			];
+				{ name: 'firstname', label: 'Имя', type: 'text' },
+				{ name: 'lastname', label: 'Фамилия', type: 'text' },
+				{ name: 'city', label: 'Город', type: 'text' },
+				{ name: 'tournaments', label: 'Турниров', type: 'text' },
+				{ name: 'seasonTournaments', label: 'Турниров сезона', type: 'text' },
+				{ name: 'games', label: 'Матчей', type: 'text' },
+				{ name: 'wins', label: 'Побед', type: 'text' },
+				{ name: 'loses', label: 'Поражений', type: 'text' },
+				{ name: 'rating', label: 'Рейтинг', type: 'text' },
+				{ name: 'rang', label: 'Ранг', type: 'select', 
+					options:  [
+						{ name: 'Новичок', val: 0 },
+						{ name: 'Любитель', val: 1 },
+						{ name: 'Эксперт', val: 2 },
+						{ name: 'Мастер', val: 3 },
+						{ name: 'Грандмастер', val: 4 }
+					]
+				},
+				{ name: 'activity', label: 'Последний турнир', type: 'text' },
+				{ name: 'active', label: 'Активность', type: 'checkbox' }
+			],
+			rangs = ['Новичок', 'Любитель', 'Эксперт', 'Мастер', 'Грандмастер'];
 			
-		db.query('select * from players', function(err, rows){
+		db.query('select * from players order by rating desc', function(err, rows){
+			var place = 0;
+		
 			for (var i = 0; i < rows.length; i++) {
+				
+				if (rows[i].active) {
+					place = place + 1;
+					rows[i].place = place;
+				} 
+			
 				rows[i].firstname = unescape(rows[i].firstname);
 				rows[i].lastname = unescape(rows[i].lastname);
-				rows[i].rang = unescape(rows[i].rang);
 				rows[i].city = unescape(rows[i].city);
+				rows[i].rang = rangs[rows[i].rang];
 			}
 			
-			rows.sort(function(a, b) {
-				return a.rating < b.rating
+			res.render('index', { 
+				title: 'Express', 
+				fields: fields, 
+				rows: rows
 			});
-			
-			res.render('index', { title: 'Express', fields: fields, rows: rows })
 		});
-	
-		
 	},
 	newPlayer: function(req, res, next) {
-		var winsPercent = Math.round((parseInt(req.body.wins) / parseInt(req.body.games)) * 100),
+		var winsPercent = Math.round((parseInt(req.body.wins.trim()) / parseInt(req.body.games.trim())) * 100),
 			query = 'insert into players (firstname, lastname, city, tournaments, seasonTournaments, games, wins, loses, wins_percent, rating, rang) values (' + 
-				'"' + escape(req.body.firstname) + '", ' +
-				'"' + escape(req.body.lastname) + '", ' +
-				'"' + escape(req.body.city) + '", ' +
-				parseInt(req.body.tournaments) + ', ' +
-				parseInt(req.body.seasonTournaments) + ', ' +
-				parseInt(req.body.games) + ', ' +
-				parseInt(req.body.wins) + ', ' +
-				parseInt(req.body.loses) + ', ' +
+				'"' + escape(req.body.firstname.trim()) + '", ' +
+				'"' + escape(req.body.lastname.trim()) + '", ' +
+				'"' + escape(req.body.city.trim()) + '", ' +
+				parseInt(req.body.tournaments.trim()) + ', ' +
+				(parseInt(req.body.seasonTournaments.trim()) || 0) + ', ' +
+				parseInt(req.body.games.trim()) + ', ' +
+				parseInt(req.body.wins.trim()) + ', ' +
+				parseInt(req.body.loses.trim()) + ', ' +
 				winsPercent + ', ' +
-				parseInt(req.body.rating) + ', ' +
-				'"' + escape(req.body.rang) + '");';
+				parseInt(req.body.rating.trim()) + ', ' +
+				'"' + parseInt(req.body.rang.trim()) + '");',
+				rangs = ['Новичок', 'Любитель', 'Эксперт', 'Мастер', 'Грандмастер'];
 		
 		db.query(query, function(err, rows){
 			if (err) {
 				throw err;
 			} else {
-				db.query('select * from players', function(err, rows){
+				db.query('select * from players order by rating desc', function(err, rows){
 					res.send({
 						status: 'ok',
 						player: {
-							firstname: req.body.firstname,
-							lastname: req.body.lastname,
+							firstname: unescape(req.body.firstname),
+							lastname: unescape(req.body.lastname),
 							city: req.body.city,
 							tournaments: req.body.tournaments,
 							seasonTournaments: req.body.seasonTournaments,
@@ -66,7 +83,7 @@ module.exports = {
 							loses: req.body.loses,
 							winsPercent: winsPercent,
 							rating: req.body.rating,
-							rang: req.body.rang
+							rang: rangs[req.body.rang]
 						},
 						rows: rows,
 					});

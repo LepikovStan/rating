@@ -8,13 +8,15 @@ var express = require('express'),
 	
 app.set('port', 3000);
 app.set('views', __dirname + '/tpl');
+app.set('static', __dirname + '/static');
 app.set('view engine', 'jade');
 
 http.createServer(app).listen(app.get('port'), function(){
-  console.log("Express server listening on port " + app.get('port'));
+  console.log("Express server listening on port " + app.get('port'), app.get('static'));
 });
 
 app.use(bodyParser());
+app.use('/static', express.static(__dirname + '/static'));
 
 app.get('/', routes.index);
 app.post('/player/new', routes.newPlayer);

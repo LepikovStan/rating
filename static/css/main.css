@@ -10,7 +10,6 @@ html {
 body {
     font: 12px/1.333 trebuchet ms;
     height: 100%;
-	background: url(../i/bg.png) repeat 0 0;
 }
 a img, fieldset {
     border: 0;
@@ -36,53 +35,26 @@ article,aside,canvas,details,embed,figcaption,figure,footer,header,hgroup,menu,n
 command,datalist,keygen,mark,meter,progress,rp,rt,ruby,time,wbr {display: inline;}
 /* html (end) */
 
-/* wrapper (begin) */
-.wrapper {
-	width: 1200px;
-	margin: 0 auto;
-	position: relative;
-}
-.ratingTable table {
-	width: 800px;
-}
-.ratingTable table td,
-.ratingTable table th {
-	border: 1px solid #000;
-	padding: 5px;
-	text-align: center;
-}
-.ratingTable div {
-	position: relative;
-}
-.ratingTable div .diff {
-	position: absolute;
-	top: 0;
-	right: 30px;
-	white-space: nowrap;
-}
-.matchResults {
-	position: fixed;
-	left: 20px;
-	top: 20px;
-}
-.matchResults table {}
-.matchResults table td {
-	vertical-align: top;
-	padding: 5px;
-}
-/* wrapper (end) */
 
-/* cols (begin) */
-.cols {}
-.cols:after {
-	content: '';
-	display: block;
-	clear: both;
-}
-.cols .l-col {
+.newplayer {
 	float: left;
 }
-.cols .r-col {
+.ratingTable {
 	float: right;
+	width: 80%;
 }
-/* cols (end) */
+.ratingTable table {
+	border-collapse: collapse;
+}
+.ratingTable th {
+	font-size: 12px;
+	border: 1px solid #000;
+	padding: 10px;
+}
+.ratingTable td {
+	border: 1px solid #000;
+	padding: 10px;
+}
+.ratingTable tr.nonactive td {
+	color: #aaa;
+}
